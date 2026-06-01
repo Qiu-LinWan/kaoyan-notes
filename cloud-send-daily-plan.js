@@ -15,9 +15,17 @@ const now = new Date();
 const currentTime = formatTimeToShanghai(now);
 const notifyTime = config.notifyTime || "07:20";
 
-if (!previewOnly && currentTime !== notifyTime) {
-  console.log(`当前上海时间 ${currentTime}，未到提醒时间 ${notifyTime}，本次跳过。`);
-  process.exit(0);
+if (!previewOnly) {
+  const currentMinutes = timeToMinutes(currentTime);
+  const notifyMinutes = timeToMinutes(notifyTime);
+  const sendWindowMinutes = 10;
+
+  if (currentMinutes < notifyMinutes || currentMinutes > notifyMinutes + sendWindowMinutes) {
+    console.log(
+      `当前上海时间 ${currentTime}，不在提醒时间 ${notifyTime} 后 ${sendWindowMinutes} 分钟内，本次跳过。`
+    );
+    process.exit(0);
+  }
 }
 
 const phase = getPhase(config.examYear, now);
@@ -259,7 +267,10 @@ function weekdayToNumber(weekdayText) {
   };
   return map[weekdayText] ?? 0;
 }
-
+function timeToMinutes(timeText) {
+  const [hourText, minuteText] = timeText.split(":");
+  return Number(hourText) * 60 + Number(minuteText);
+}
 function formatTimeToShanghai(date) {
   const parts = getShanghaiParts(date);
   return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
