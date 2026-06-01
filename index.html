@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的考研每日计划</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Personal Study Planner</p>
+        <h1>为你量身定做的考研每日计划网</h1>
+        <p class="hero-copy">
+          从基础开始也没关系。这个页面会根据你的基础、每天可用时间和当前阶段，
+          自动生成今天该学什么、学多久、先学哪一科。
+        </p>
+      </div>
+      <div class="hero-card">
+        <p class="hero-date" id="todayDate"></p>
+        <h2>今日总目标</h2>
+        <p id="dailyHeadline">先填写你的情况，我来帮你生成今天的专属计划。</p>
+        <button class="primary-btn" id="generatePlanBtn">生成今日计划</button>
+      </div>
+    </header>
+
+    <main class="grid-layout">
+      <section class="panel panel-form">
+        <div class="panel-title-row">
+          <h2>基础信息</h2>
+          <span class="tag">第一次使用先填这里</span>
+        </div>
+
+        <form id="profileForm" class="profile-form">
+          <label>
+            你的称呼
+            <input type="text" id="studentName" placeholder="比如：小林">
+          </label>
+
+          <label>
+            当前年级
+            <select id="studentYear">
+              <option value="sophomore">大二</option>
+              <option value="junior">大三</option>
+              <option value="senior">大四</option>
+            </select>
+          </label>
+
+          <label>
+            目标初试年份
+            <select id="examYear">
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+          </label>
+
+          <label>
+            上课日可学习时长（小时）
+            <input type="number" id="weekdayHours" min="2" max="12" step="0.5" value="5">
+          </label>
+
+          <label>
+            周末可学习时长（小时）
+            <input type="number" id="weekendHours" min="3" max="14" step="0.5" value="8">
+          </label>
+
+          <label>
+            每天开始学习时间
+            <input type="time" id="studyStartTime" value="07:30">
+          </label>
+
+          <label>
+            你现在最薄弱的科目
+            <select id="weakestSubject">
+              <option value="math">数学</option>
+              <option value="english">英语</option>
+              <option value="major">408专业课</option>
+            </select>
+          </label>
+
+          <label>
+            数学基础
+            <select id="mathLevel">
+              <option value="weak">比较弱</option>
+              <option value="basic">一般</option>
+              <option value="good">还可以</option>
+            </select>
+          </label>
+
+          <label>
+            英语基础
+            <select id="englishLevel">
+              <option value="weak">比较弱</option>
+              <option value="basic">一般</option>
+              <option value="good">还可以</option>
+            </select>
+          </label>
+
+          <label>
+            408基础
+            <select id="majorLevel">
+              <option value="weak">比较弱</option>
+              <option value="basic">一般</option>
+              <option value="good">还可以</option>
+            </select>
+          </label>
+
+          <label>
+            每天提醒时间
+            <input type="time" id="notifyTime" value="07:20" step="300">
+          </label>
+
+          <label>
+            手机推送方式
+            <select id="pushProvider">
+              <option value="pushplus">PushPlus 微信/APP 推送</option>
+            </select>
+          </label>
+
+          <label>
+            PushPlus Token
+            <input type="text" id="pushToken" placeholder="填写你的 PushPlus token">
+          </label>
+
+          <label>
+            数学当前进度
+            <input type="text" id="mathProgress" placeholder="比如：高数第一轮到导数">
+          </label>
+
+          <label>
+            英语当前进度
+            <input type="text" id="englishProgress" placeholder="比如：单词第一轮，阅读刚开始">
+          </label>
+
+          <label>
+            408当前进度
+            <input type="text" id="majorProgress" placeholder="比如：数据结构学到栈和队列">
+          </label>
+
+          <label>
+            当前任务偏向
+            <select id="studyMode">
+              <option value="foundation">补基础</option>
+              <option value="practice">做题巩固</option>
+              <option value="review">错题复盘</option>
+            </select>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn">保存我的信息</button>
+            <button type="button" class="ghost-btn" id="notifyBtn">开启浏览器提醒</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel panel-plan">
+        <div class="panel-title-row">
+          <h2>今日学习任务</h2>
+          <span class="tag" id="phaseTag">基础重建期</span>
+        </div>
+        <div class="summary-strip">
+          <div>
+            <p class="summary-label">今日总时长</p>
+            <p class="summary-value" id="totalHours">0 小时</p>
+          </div>
+          <div>
+            <p class="summary-label">已完成</p>
+            <p class="summary-value" id="completedCount">0 / 0</p>
+          </div>
+          <div>
+            <p class="summary-label">连续打卡</p>
+            <p class="summary-value" id="streakCount">0 天</p>
+          </div>
+        </div>
+        <div id="planList" class="task-list empty-state">
+          填写你的基础信息后，点击“生成今日计划”。
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>本周节奏</h2>
+          <span class="tag">自动建议</span>
+        </div>
+        <div id="weeklyAdvice" class="weekly-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>当前阶段路线</h2>
+          <span class="tag">按今天日期自动变化</span>
+        </div>
+        <div id="roadmapCards" class="roadmap-grid"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>热门规划方法</h2>
+          <span class="tag">参考近期抖音备考共识</span>
+        </div>
+        <div id="methodCards" class="weekly-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title-row">
+          <h2>学习档案</h2>
+          <span class="tag">自动统计</span>
+        </div>
+        <div class="archive-grid">
+          <div class="archive-card">
+            <p class="summary-label">今日完成率</p>
+            <p class="archive-value" id="completionRate">0%</p>
+          </div>
+          <div class="archive-card">
+            <p class="summary-label">最近 7 天打卡</p>
+            <div id="studyCalendar" class="study-calendar"></div>
+          </div>
+          <div class="archive-card archive-notes-card">
+            <p class="summary-label">错题 / 备注汇总</p>
+            <div id="notesSummary" class="notes-summary">今天还没有备注记录。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel push-panel">
+        <div class="panel-title-row">
+          <h2>手机强推送</h2>
+          <span class="tag">支持云端模式</span>
+        </div>
+        <p class="push-copy">
+          这里有两种模式。
+          本地模式适合先快速试用；云端模式适合你现在这个需求：电脑关机也能照样推送到手机。
+        </p>
+        <div class="push-mode-card">
+          <h3>云端模式（推荐）</h3>
+          <p>
+            下载云端配置文件后，把这个项目上传到 GitHub，
+            再在仓库里配置 <code>PUSHPLUS_TOKEN</code> Secret。
+            GitHub Actions 会每 5 分钟检查一次，到你的提醒时间后自动发送。
+          </p>
+          <div class="push-actions">
+            <button type="button" class="primary-btn" id="downloadCloudConfigBtn">下载云端配置</button>
+            <button type="button" class="ghost-btn" id="copySecretNameBtn">复制 Secret 名称</button>
+            <button type="button" class="ghost-btn" id="copyVariableNameBtn">复制 Variable 名称</button>
+            <button type="button" class="ghost-btn" id="copyCloudJsonBtn">复制云端 JSON</button>
+          </div>
+          <div class="command-box">
+            <p class="summary-label">GitHub Secret 名称</p>
+            <code id="secretNameText">PUSHPLUS_TOKEN</code>
+          </div>
+          <div class="command-box">
+            <p class="summary-label">GitHub Variable 名称</p>
+            <code id="variableNameText">KAOYAN_PROFILE_JSON</code>
+          </div>
+        </div>
+        <div class="push-mode-card">
+          <h3>本地模式</h3>
+          <p>
+            这部分会导出你的推送配置，并配套两个本地脚本：
+            一个负责每天生成并发送今日计划，一个负责注册 Windows 定时任务。
+            前提是你的电脑在提醒时间保持开机并联网。
+          </p>
+        </div>
+        <div class="push-actions">
+          <button type="button" class="primary-btn" id="downloadConfigBtn">下载推送配置</button>
+          <button type="button" class="ghost-btn" id="copyInstallCmdBtn">复制安装命令</button>
+          <button type="button" class="ghost-btn" id="copyTestCmdBtn">复制测试命令</button>
+        </div>
+        <div class="command-box">
+          <p class="summary-label">安装命令</p>
+          <code id="installCommand"></code>
+        </div>
+        <div class="command-box">
+          <p class="summary-label">测试命令</p>
+          <code id="testCommand"></code>
+        </div>
+        <div class="push-tips">
+          <p>1. 先在 PushPlus 获取你的 token，然后填到上面的输入框。</p>
+          <p>2. 云端模式：复制云端 JSON，上传项目到 GitHub 仓库，并把 token 存成 GitHub Secret：<code>PUSHPLUS_TOKEN</code>，再把 JSON 存成 GitHub Variable：<code>KAOYAN_PROFILE_JSON</code>。</p>
+          <p>3. 本地模式：下载 <code>push-config.json</code>，运行安装命令后，Windows 会在你设定的时间自动发送当天计划到手机。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="taskItemTemplate">
+    <article class="task-item">
+      <div class="task-topline">
+        <input type="checkbox" class="task-checkbox">
+        <div>
+          <p class="task-title"></p>
+          <p class="task-meta"></p>
+        </div>
+      </div>
+      <p class="task-detail"></p>
+      <div class="task-points-wrap">
+        <p class="task-points-title">今天要完成的任务点</p>
+        <div class="task-points"></div>
+      </div>
+    </article>
+  </template>
+
+  <template id="taskPointTemplate">
+    <div class="task-point-card">
+      <label class="task-point-item">
+        <input type="checkbox" class="task-point-checkbox">
+        <span class="task-point-text"></span>
+      </label>
+      <div class="task-point-note-row">
+        <input type="text" class="task-point-note-input" placeholder="记录你的备注、错题点或明天回看内容">
+        <button type="button" class="task-point-note-btn">保存备注</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

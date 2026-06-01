@@ -1,0 +1,24 @@
+name: Daily Cloud Push
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  push-daily-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Send plan
+        env:
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          KAOYAN_PROFILE_JSON: ${{ vars.KAOYAN_PROFILE_JSON }}
+        run: node cloud-send-daily-plan.js
